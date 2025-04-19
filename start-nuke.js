@@ -69,8 +69,8 @@ export async function main(ns)
 async function nukeHost(ns, target)
 {
     var maxRam = ns.getServerMaxRam(target);
-    var usedRam = ns.getServerUsedRam(target)
-    var wormRam = ns.getScriptRam("nuke.js", target)
+    var usedRam = ns.getServerUsedRam(target);
+    var wormRam = ns.getScriptRam("nuke.js", target);
 
     // Avoid 0 division if script is missing (scp failed)
     if (wormRam === 0)

@@ -12,7 +12,8 @@
  */
 
 /** @param {NS} ns */
-export async function main(ns) {
+export async function main(ns)
+{
     const seen_hosts = new Set();
     let depth = 0;
 
@@ -65,7 +66,8 @@ export async function main(ns) {
  * @param {NS} ns
  * @param {string} target host to find contracts on
  */
-async function findContract(ns, target) {
+async function findContract(ns, target)
+{
 
     const files = ns.ls(target);
 
