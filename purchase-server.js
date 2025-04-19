@@ -1,6 +1,6 @@
 /**
- * Basic buying server and copying then starting supplied script
- * with max threads. Prefixes servers with 'pserv-'
+ * Basic buying server and copying required scripts.
+ * Prefixes servers with 'pserv-'
  */
 
 /** @param {NS} ns */
@@ -8,9 +8,6 @@ export async function main(ns)
 {
     const ram = 64;
     const remoteScript = "remote-nuke.js";
-    const remoteScriptRam = ns.getScriptRam(remoteScript, "home");
-
-    const allowed_threads = Math.floor(ram / remoteScriptRam);
 
     let i = 0;
 
@@ -18,10 +15,12 @@ export async function main(ns)
     {
         if (ns.getServerMoneyAvailable("home") > ns.getPurchasedServerCost(ram))
         {
-            let group = Math.floor(i / 5);
             let hostname = ns.purchaseServer("pserv-" + i, ram);
             ns.scp(remoteScript, hostname);
-            ns.exec(remoteScript, hostname, allowed_threads, group);
+
+            // Startup servers
+            ns.run("update-owned-server.js");
+
             i++;
         }
 

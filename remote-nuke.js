@@ -1,10 +1,12 @@
 /**
- * Basic weaken, grow or hack on remote target.
+ * Basic weaken, grow or hack on remote target. Divides servers into groups with set roles.
+ * Roles are divided based on passed group_size. Priority order: Weaken, Grow then hack.
  *
- * TODO:
- *      Divide into groups and use a singleton on home that tracks who is doing what, so if
- *      2 in the group is weakening and it will cause Security level to be at target level:
- *      Start hack in time for when weaken is complete.
+ * Group size dynamic roles:
+ *      1: Weaken
+ *      2: Grow
+ *      3: Hack
+ *
  */
 
 /**
@@ -13,37 +15,54 @@
  */
 export async function main(ns, allowed_threads)
 {
-    const group = ns.args[0];
+    const target = ns.args[0];
+    const role = ns.args[1];
 
     // To not make them look at old values,
     // as all machines update and check at the same time otherwise.
-    ns.asleep(Math.floor(Math.random() * 5000) + 1000);
+    ns.asleep(Math.floor(Math.random() * 3000) + 1000);
 
-    const target_list = ["phantasy", "zer0", "max-hardware", "iron-gym", "silver-helix", "neo-net"];
+    let action = 0;
 
-    // To not overwhelm (25 grows executing at the same time, making all 25 do weaken afterwards)
-    // the target, servers are divided into groups. TODO: Singleton to track current group actions.
-    const target = target_list[group];
+    switch (role)
+    {
+        case "weaken":
+            action = 1;
+            break;
+        case "grow":
+            action = 2;
+            break;
+        case "hack":
+            action = 3;
+            break;
+        default:
+            throw new Error(`Invalid action. Verify role: ${role} exists.`);
+    }
 
-    const moneyThresh = ns.getServerMaxMoney(target);
-    const securityThresh = ns.getServerMinSecurityLevel(target);
-
-    // Infinite loop that continously hacks/grows/weakens the target server
     while(true)
     {
-        if (ns.getServerSecurityLevel(target) > securityThresh)
+        switch (action)
         {
-            // If the server's security level is above our threshold, weaken it
-            await ns.weaken(target, {threads: allowed_threads});
+            case 1:
+                await ns.weaken(target, { threads: allowed_threads });
+
+                break;
+            case 2:
+                await ns.grow(target, { threads: allowed_threads });
+
+                break;
+            case 3:
+                let gain = await ns.hack(target, { threads: allowed_threads });
+
+                // Hack was unsuccessful. Support weakening role
+                if (gain === 0) {
+                    await ns.weaken(target, { threads: allowed_threads });
+                }
+
+                break;
+            default:
+                throw new Error("Invalid action");
         }
-        else if (ns.getServerMoneyAvailable(target) < moneyThresh)
-        {
-            // If the server's money is less than our threshold, grow it
-            await ns.grow(target, {threads: allowed_threads});
-        }
-        else
-        {
-            await ns.hack(target, {threads: allowed_threads});
-        }
+
     }
 }
