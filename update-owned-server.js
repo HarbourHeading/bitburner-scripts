@@ -15,6 +15,8 @@ export async function main(ns) {
     const remoteScript = "remote-nuke.js";
     const remoteScriptRam = ns.getScriptRam(remoteScript, "home");
 
+    let i = 0;
+
     purchased_servers.forEach((element) =>
     {
         if (excluded_servers.includes(element))
@@ -22,11 +24,14 @@ export async function main(ns) {
             return;
         }
 
-        var maxRam = ns.getServerMaxRam(element);
-        var allowed_threads = Math.floor(maxRam / remoteScriptRam);
+        let group = Math.floor(i / 5);
+
+        const maxRam = ns.getServerMaxRam(element);
+        const allowed_threads = Math.floor(maxRam / remoteScriptRam);
 
         ns.killall(element);
         ns.scp(remoteScript, element);
-        ns.exec(remoteScript, element, allowed_threads);
+        ns.exec(remoteScript, element, allowed_threads, group);
+        i++;
     })
 }

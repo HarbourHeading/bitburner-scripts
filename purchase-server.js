@@ -18,9 +18,10 @@ export async function main(ns)
     {
         if (ns.getServerMoneyAvailable("home") > ns.getPurchasedServerCost(ram))
         {
+            let group = Math.floor(i / 5);
             let hostname = ns.purchaseServer("pserv-" + i, ram);
             ns.scp(remoteScript, hostname);
-            ns.exec(remoteScript, hostname, allowed_threads);
+            ns.exec(remoteScript, hostname, allowed_threads, group);
             i++;
         }
 
