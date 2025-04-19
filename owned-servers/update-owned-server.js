@@ -42,14 +42,11 @@ export async function main(ns)
     // TODO: Calculate based on own length of purchased servers - excluded if there will be servers
     //       less than 3 members. If so, make them into RAM sharers.
 
-    // Roles are dynamically set based on group size. Default is 5 (2 weaken, 2 grow and 2 hack.)
+    // Roles are dynamically set based on group size. Default is 5 (2 weaken, 2 grow and 1 hack.)
     // Groups should not be smaller than 3, as it does not dynamically take the missing role.
     let group_size = 5;
 
     const target_list = ["phantasy", "zer0", "max-hardware", "iron-gym", "silver-helix", "neo-net"];
-
-    const remoteScript = "remote-nuke.js";
-    const remoteScriptRam = ns.getScriptRam(remoteScript, "home");
 
     let i = 0;
 
@@ -69,6 +66,10 @@ export async function main(ns)
         // To not overwhelm (25 grows executing at the same time, making all 25 do weaken afterwards)
         // the target, servers are divided into groups. TODO: Singleton to track current group actions.
         const target = target_list[group];
+
+        // Dynamically get script RAM as they differ based on role
+        const remoteScript = `remote-nuke-${role}.js`;
+        const remoteScriptRam = ns.getScriptRam(remoteScript, "home");
 
         const maxRam = ns.getServerMaxRam(element);
         const allowed_threads = Math.floor(maxRam / remoteScriptRam);
